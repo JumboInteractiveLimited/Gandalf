@@ -1,0 +1,11 @@
+*.yml
+Dockerfile
+.dockerignore
+.gitignore
+*.md
+*.sh
+old
+example.old
+*.json
+tags
+/example
