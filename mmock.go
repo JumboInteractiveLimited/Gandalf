@@ -106,7 +106,7 @@ func (m *ToMMock) saveMockToFile(mock definition.Mock, dest string) error {
 		return err
 	}
 	err = ioutil.WriteFile(path.Join(dest, mock.Description+".json"), out, 0644)
-	time.Sleep(time.Millisecond * 250)
+	time.Sleep(time.Duration(MockSleep) * time.Millisecond)
 	m.saved = true
 	return err
 }

@@ -33,6 +33,11 @@ var OverrideChaos bool
 // this to true or use the `-gandalf.mmock-skip` cli switch.
 var MockSkip bool
 
+// If you would like to override the default sleep after exporting
+// a mock definition set this to the number of milliseconds to sleep
+// or use the `-gandalf.mock-sleep` cli switch.
+var MockSleep int
+
 // Gandalf can be configured with custom flags given
 // to the `go test` command or be setting the respective
 // global variables.
@@ -46,6 +51,7 @@ func init() {
 	flag.BoolVar(&OverrideChaos, "gandalf.mmock-chaos", false, "Force enable chaos testing in all output mmock definitions.")
 	flag.BoolVar(&MockSkip, "gandalf.mmock-skip", false, "Skip exporting contract definitions to mmock.")
 	flag.BoolVar(&OverrideColour, "gandalf.colour", false, "Override tty detection and force colour output.")
+	flag.IntVar(&MockSleep, "gandalf.mock-sleep", 250, "Override milliseconds to wait after exporting a mock definition.")
 	flag.StringVar(&MockSavePath, "gandalf.mock-dest", "./", "Destination to use when saving mocks.")
 	flag.StringVar(&OverrideHost, "gandalf.provider-host", "", "if set to a non empty string all http requests for calls will be rewritten to use this address as the hostname and optional port.")
 	flag.StringVar(&OverrideHostSuffix, "gandalf.provider-suffix", "", "when provided, this will be appended to the hostname of any and all outbound http requests.")
