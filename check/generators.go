@@ -1,5 +1,5 @@
-// Check functions are so simple there are many useful ways
-// they can be generated using lambdas/closures.
+// check functions are so simple there are many useful ways
+// they can be generated.
 package check
 
 import (
@@ -9,7 +9,8 @@ import (
 	"strings"
 )
 
-// Flip the output of the given Func
+// Invert the output of the given Func, if it returned nil then return an
+// error, if it returned error return nil.
 func Invert(next Func) Func {
 	cname := "Invert"
 	return func(found string) error {
@@ -21,7 +22,7 @@ func Invert(next Func) Func {
 	}
 }
 
-// Combines multiple Func's into a single one where all must pass.
+// And combines multiple check Func's into a single one where all must pass.
 // Short circuits on first failure.
 func And(funcs ...Func) Func {
 	cname := "And"
@@ -38,7 +39,7 @@ func And(funcs ...Func) Func {
 	}
 }
 
-// Combines multiple Func's into a single one where any one must pass, the rest may fail.
+// Or combines multiple check Func's into a single one where any one must pass, the rest may fail.
 // Short circuits on first success.
 func Or(funcs ...Func) Func {
 	cname := "Or"
@@ -60,8 +61,9 @@ func Or(funcs ...Func) Func {
 	}
 }
 
-// Simple cases may want to do a string equality check on the found value.
-// This performs no deserialization of the value, this means you may need to include qoutes for strings.
+// Equality dose a string equality check on the found value. This performs no
+// deserialization of the value, this means you may need to include qoutes for
+// strings.
 func Equality(expected string) Func {
 	cname := "Equality"
 	return func(found string) error {
@@ -73,7 +75,8 @@ func Equality(expected string) Func {
 	}
 }
 
-// Compiles the given regex and returns a patcheck Func that asserts values match the expression.
+// RegexMatch compiles the given regex and returns a patcheck Func that asserts
+// values match the expression.
 func RegexMatch(expr string) Func {
 	cname := "RegexMatch"
 	ex, err := regexp.Compile(expr)
@@ -89,9 +92,9 @@ func RegexMatch(expr string) Func {
 	}
 }
 
-// Allows transformation of a value before passing it to the next pathcheck Func.
-// This might be useful for stripping whitespace or normalizing case.
-// The func f will be run each time the Func next is evaluated.
+// Transform make it easy to alter a value before passing it to the next
+// pathcheck Func. This might be useful for stripping whitespace or normalizing
+// case. The func f will be run each time the Func next is evaluated.
 func Transform(f func(string) string, next Func) Func {
 	return func(found string) error {
 		return next(f(found))

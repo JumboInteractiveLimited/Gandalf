@@ -10,9 +10,9 @@ import (
 	"github.com/jmartin82/mmock/definition"
 )
 
-// mmock (https://github.com/jmartin82/mmock) is an http mocking server,
-// Contract objects can be converted to the mmock definition to build a
-// fake api endpoint with optional state via mmock scenarios.
+// ToMMock exports Contract as mmock definitions to build a fake api endpoint
+// with optional state via mmock scenarios. mmock
+// (https://github.com/jmartin82/mmock) is an http mocking server.
 type ToMMock struct {
 	// The Scenario to which state is stored.
 	Scenario string
@@ -111,7 +111,7 @@ func (m *ToMMock) saveMockToFile(mock definition.Mock, dest string) error {
 	return err
 }
 
-// Saves a valid mmock definition to a json file with the contract name as the filename.
+// Save a valid mmock definition to a json file with the contract name as the filename.
 // This incurs disk IO so is restricted to only saving once per instance.
 func (m *ToMMock) Save(c *Contract) error {
 	if m.saved || c.Tested || MockSkip {

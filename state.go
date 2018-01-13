@@ -7,25 +7,24 @@ import (
 	"sync"
 )
 
-// This is a state repository that can be used to perform
-// stateful requests and response checks. This uses a thread
-// safe singleton pattern and should not be instantiated
-// anywhere other than GetState.
+// State is an in memory repository that can be used to perform stateful
+// requests and response checks. This uses a thread safe singleton pattern and
+// should not be instantiated anywhere other than GetState.
 type State struct {
 	KV map[string]interface{}
 }
 
-// Wipe all state clean.
+// Clear wipes all state clean.
 func (s *State) Clear() {
 	s.KV = map[string]interface{}{}
 }
 
-// Wipe a single key.
+// ClearKey wipes a single key.
 func (s *State) ClearKey(key string) {
 	delete(s.KV, key)
 }
 
-// Wipe all keys that match expr.
+// ClearRegex wipes all keys that match expr.
 func (s *State) ClearRegex(expr string) error {
 	ex, err := regexp.Compile(expr)
 	if err != nil {
@@ -39,7 +38,7 @@ func (s *State) ClearRegex(expr string) error {
 	return nil
 }
 
-// Get a response object stored at "{{Key}}.response".
+// GetResponse returns data stored at "{{Key}}.response".
 func (s *State) GetResponse(key string) *http.Response {
 	return s.KV[key+".response"].(*http.Response)
 }
@@ -47,7 +46,7 @@ func (s *State) GetResponse(key string) *http.Response {
 var stateInstance *State
 var stateInstanceOnce sync.Once
 
-// Return the thread safe global State instance.
+// GetState return the thread safe global State instance.
 func GetState() *State {
 	stateInstanceOnce.Do(func() {
 		stateInstance = &State{}
@@ -56,16 +55,18 @@ func GetState() *State {
 	return stateInstance
 }
 
-// Every time the contract is called this will store the
+// ToState is an exporter that will store the
 // response for later usage.
 type ToState struct {
 	Key     string
 	lastRun int
 }
 
-// Exports the response of the current Requester run to
+// Save the response of the current Requester run to
 // a key in State.KV of the format (go tmpl style)
-// "{{ ToState.Key }}.response" each time.
+// "{{ ToState.Key }}.response" each time. It is expected
+// that the Requester implements debouncing/caching so that
+// Requester.Call can be rexecuted in the same run.
 func (e *ToState) Save(c *Contract) error {
 	if e.Key == "" {
 		return errors.New("exporter ToState requires a non empty Key for storage")

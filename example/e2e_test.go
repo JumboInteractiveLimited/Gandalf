@@ -66,14 +66,6 @@ func statelessContracts() []*Contract {
 	}
 }
 
-func TestValidStatelessContracts(t *testing.T) {
-	for _, tc := range statelessContracts() {
-		t.Run(tc.Name, func(st *testing.T) {
-			tc.Validate(st)
-		})
-	}
-}
-
 func TestStatelessContracts(t *testing.T) {
 	if testing.Short() {
 		t.Skip()
@@ -91,7 +83,7 @@ func BenchmarkStatelessContracts(b *testing.B) {
 	}
 	for _, bc := range statelessContracts() {
 		b.Run(bc.Name, func(sb *testing.B) {
-			bc.BenchmarkInSequence(sb)
+			bc.Benchmark(sb)
 		})
 	}
 }

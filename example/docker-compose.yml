@@ -3,10 +3,6 @@ version: "2.1"
 services:
   gandalf:
     build: ../
-    external_links:
-      - "${GANDALF_TARGET:-mock}:target"
-    environment:
-      - GANDALF_MMOCK_DIR=/mmock
     volumes:
       - ../:/go/src/github.com/JumboInteractiveLimited/Gandalf
       - mmock:/mmock

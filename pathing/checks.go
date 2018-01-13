@@ -1,4 +1,4 @@
-// Pathing is a collection of functions that are able to
+// Package pathing is a collection of functions that are able to
 // extract values from data using on a path/query.
 package pathing
 
@@ -16,12 +16,12 @@ import (
 // along with an error to indicate failure or success.
 type Extractor func(source, path string) ([]string, error)
 
-// A collection of path expressions for a given Extrator and
+// PathChecks is a collection of path expressions for a given Extrator and
 // check.Func's to check the value(s) with.
 type PathChecks map[string]check.Func
 
-// Extracts paths (keys of the given PathChecks and passes the value
-// add that path to a check.Func for assertion.
+// Checks extracts paths (keys of the given PathChecks and passes the value add
+// that path to a check.Func for assertion.
 func Checks(ex Extractor, pcs PathChecks) check.Func {
 	cname := "PathingChecks"
 	return func(found string) error {

@@ -6,19 +6,19 @@ import (
 	"net/http"
 )
 
-// Allows using multiple Exporter structs in one contract.
+// ToMultiple allows using multiple Exporter structs in one contract.
 type ToMultiple struct {
 	Exporters []Exporter
 }
 
-// Convenience function for creating a ToMultiple
+// ExportToMultiple is a convenience function for creating a ToMultiple.
 func ExportToMultiple(es ...Exporter) *ToMultiple {
 	return &ToMultiple{
 		Exporters: es,
 	}
 }
 
-// Loops through Exporters and gives the Contract
+// Save loops through Exporters and gives the Contract
 // to each Save method, stopping on the first error.
 func (m *ToMultiple) Save(c *Contract) error {
 	for _, ex := range m.Exporters {
@@ -29,9 +29,9 @@ func (m *ToMultiple) Save(c *Contract) error {
 	return nil
 }
 
-// Reads the body from the request to be returned
-// but also creates a new reader to put the body
-// back into the response, allowing multiple reads.
+// GetRequestBody reads the body from the request to be returned but also
+// creates a new reader to put the body back into the response, allowing
+// multiple reads.
 func GetRequestBody(r *http.Request) string {
 	if r == nil {
 		return ""
@@ -44,9 +44,9 @@ func GetRequestBody(r *http.Request) string {
 	return string(bb)
 }
 
-// Reads the body from the response to be returned
-// but also creates a new reader to put the body
-// back into the response, allowing multiple reads.
+// GetResponseBody reads the body from the response to be returned but also
+// creates a new reader to put the body back into the response, allowing
+// multiple reads.
 func GetResponseBody(r *http.Response) string {
 	if r == nil {
 		return ""
@@ -59,9 +59,8 @@ func GetResponseBody(r *http.Response) string {
 	return string(bb)
 }
 
-// Returns a new HTTP response that should be sane;
-// it has a 200 status code, body of "A", HTTP/1.1
-// protocol, etc.
+// SaneResponse returns a new HTTP response that should be sane; it has a 200
+// status code, body of "A", HTTP/1.1 protocol, etc.
 func SaneResponse() *http.Response {
 	return &http.Response{
 		StatusCode:    200,

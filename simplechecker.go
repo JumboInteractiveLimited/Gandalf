@@ -9,8 +9,9 @@ import (
 	"github.com/JumboInteractiveLimited/Gandalf/check"
 )
 
-// A Checker that asserts the expected HTTP status code, headers, and
-// uses pathing.check.Func for checking the contents of the body.
+// SimpleChecker implements a Checker that asserts the expected HTTP status
+// code, headers, and uses pathing.check.Func for checking the contents of the
+// body.
 type SimpleChecker struct {
 	// HTTP Status code expected, ignored if left as default (0).
 	HTTPStatus int
@@ -22,7 +23,7 @@ type SimpleChecker struct {
 	ExampleBody string
 }
 
-// Returns a new HTTP response that should meet all checks.
+// GetResponse returns a new HTTP response that should meet all checks.
 func (c *SimpleChecker) GetResponse() *http.Response {
 	r := SaneResponse()
 	r.StatusCode = c.HTTPStatus
@@ -34,7 +35,7 @@ func (c *SimpleChecker) GetResponse() *http.Response {
 }
 
 // Assert the given HTTP response has the expected status code
-func (c *SimpleChecker) AssertStatus(res *http.Response) (err error) {
+func (c *SimpleChecker) assertStatus(res *http.Response) (err error) {
 	if c.HTTPStatus != 0 && res.StatusCode != c.HTTPStatus {
 		err = fmt.Errorf("HTTP Status code %d (%s) does not match expected %d (%s)",
 			res.StatusCode, http.StatusText(res.StatusCode), c.HTTPStatus, http.StatusText(c.HTTPStatus))
@@ -45,7 +46,7 @@ func (c *SimpleChecker) AssertStatus(res *http.Response) (err error) {
 // Assert the given HTTP response has the expected headers, this check allows
 // for additional headers to those that are expected without error but all expected
 // headers must have (at least) the specified value(s).
-func (c *SimpleChecker) AssertHeaders(res *http.Response) (err error) {
+func (c *SimpleChecker) assertHeaders(res *http.Response) (err error) {
 	if len(c.Headers) == 0 {
 		return nil
 	}
@@ -79,7 +80,7 @@ func (c *SimpleChecker) AssertHeaders(res *http.Response) (err error) {
 // or you could use pathing.Checks to extract data from a structured
 // text body. If BodyCheck is not set then it will use a string
 // equality against the ExampleBody field.
-func (c *SimpleChecker) AssertBody(res *http.Response) (err error) {
+func (c *SimpleChecker) assertBody(res *http.Response) (err error) {
 	if c.BodyCheck == nil {
 		c.BodyCheck = check.Equality(c.ExampleBody)
 	}
@@ -88,15 +89,15 @@ func (c *SimpleChecker) AssertBody(res *http.Response) (err error) {
 
 // Assert the given HTTP response meets all checks.
 // Executes methods in the following order:
-//  1) SimpleChecker.AssertStatus
-//  2) SimpleChecker.AssertHeaders
-//  3) SimpleChecker.AssertBody
+//  1) SimpleChecker.assertStatus
+//  2) SimpleChecker.assertHeaders
+//  3) SimpleChecker.assertBody
 func (c *SimpleChecker) Assert(res *http.Response) error {
-	if e := c.AssertStatus(res); e != nil {
+	if e := c.assertStatus(res); e != nil {
 		return fmt.Errorf("Status check failed, response body was:\n%s\n%s", GetResponseBody(res), e)
 	}
-	if e := c.AssertHeaders(res); e != nil {
+	if e := c.assertHeaders(res); e != nil {
 		return e
 	}
-	return c.AssertBody(res)
+	return c.assertBody(res)
 }

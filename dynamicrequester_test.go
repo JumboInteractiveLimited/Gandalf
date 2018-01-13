@@ -16,12 +16,9 @@ func TestDynamicRequester(t *testing.T) {
 	if body := GetRequestBody(r.GetRequest()); body != "0" {
 		t.Fatalf("Incorrect request generated, body of %s instead of 0", body)
 	}
-	rs, err := r.Call(1)
+	_, err := r.Call(1)
 	if err != nil {
 		t.Fatalf("Unexpected error on call: %s", err)
-	}
-	if rs.StatusCode != 200 {
-		t.Fatalf("Got status code %d instead of the expected 200", rs.StatusCode)
 	}
 }
 
