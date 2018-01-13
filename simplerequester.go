@@ -6,7 +6,8 @@ import (
 	"time"
 )
 
-// A Requester that executes the stored Request each time.
+// SimpleRequester implements a Requester that executes the stored Request each
+// time.
 type SimpleRequester struct {
 	Request  *http.Request
 	Timeout  time.Duration
@@ -14,7 +15,8 @@ type SimpleRequester struct {
 	lastResp *http.Response
 }
 
-// Wrapper to easily create a SimpleRequester.
+// NewSimpleRequester is a wrapper to easily create a SimpleRequester given a
+// limited set of common inputs.
 func NewSimpleRequester(method, url, body string, headers http.Header, timeout time.Duration) *SimpleRequester {
 	req, err := http.NewRequest(method, url, bytes.NewBuffer([]byte(body)))
 	if err != nil {
@@ -45,7 +47,7 @@ func (r *SimpleRequester) Call(run int) (*http.Response, error) {
 	return res, err
 }
 
-// Get the Request.
+// GetRequest SimpleRequester.Request.
 func (r *SimpleRequester) GetRequest() *http.Request {
 	return r.Request
 }

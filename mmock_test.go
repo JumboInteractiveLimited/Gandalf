@@ -52,10 +52,6 @@ func TestMMockExporter(t *testing.T) {
 	getMMockContract().Assert(t)
 }
 
-func TestMMockValidate(t *testing.T) {
-	getMMockContract().Validate(t)
-}
-
 func BenchmarkMMockContracts(b *testing.B) {
 	if testing.Short() {
 		b.Skipf("MMock saving to file system is slow and therefore skipped in short mode.")

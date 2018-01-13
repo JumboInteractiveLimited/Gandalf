@@ -64,9 +64,3 @@ func BenchmarkSimpleCheckerAssert(b *testing.B) {
 		getSimpleCheckerContract().Assert(b)
 	}
 }
-
-func BenchmarkSimpleCheckerValidate(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		getSimpleCheckerContract().Validate(b)
-	}
-}

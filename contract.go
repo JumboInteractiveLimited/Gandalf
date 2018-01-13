@@ -8,7 +8,7 @@ import (
 // consumer and provider in two main parts, the Request, and the Check.
 // The Request object is responsible for geting information into Gandalf
 // from the provider for testing. Then the response is given to the Check
-// object to validate that the response meets whatever criteria the Checker supports.
+// object to  that the response meets whatever criteria the Checker supports.
 type Contract struct {
 	// Unique identifier for this contract.
 	Name    string
@@ -37,17 +37,11 @@ func (c *Contract) honorCheck(t Testable, err error) {
 	}
 }
 
-// Common interface between tests and benchmarks required to handle them interchangeably.
+// Testable is the common interface between tests and benchmarks required to handle them interchangeably.
 type Testable interface {
 	Helper()
 	Fatalf(format string, args ...interface{})
 	Skipf(format string, args ...interface{})
-}
-
-// Gets a fake HTTP Response from the Requester and passes it to the Checker for validating.
-// If this passes it should prove that the contract definition is valid and consistent.
-func (c *Contract) Validate(t Testable) {
-	c.honorCheck(t, c.Check.Assert(c.Check.GetResponse()))
 }
 
 func (c *Contract) export(t Testable) {
@@ -58,8 +52,8 @@ func (c *Contract) export(t Testable) {
 	}
 }
 
-// Executes a full request and check response on the contract causing a pass or fail.
-// This executes the Exporter before and after calling the Requester, this allows
+// Assert runs a request and checks response on the contract causing a pass or fail.
+// This executes the Exporter before and after calling the Requester, allowing
 // for pre and post exporters.
 func (c *Contract) Assert(t Testable) {
 	defer func() { c.Run++ }()
@@ -74,7 +68,7 @@ func (c *Contract) Assert(t Testable) {
 
 // Benchmark just the Requester's ability to provider responses in sequence.
 // This uses the benchmark run counter instead of the Contract.Run field.
-func (c *Contract) BenchmarkInSequence(b *testing.B) {
+func (c *Contract) Benchmark(b *testing.B) {
 	if c.Tested && c.notHonored {
 		b.Skipf("Contract %#v benchmark skipped as the contract was not honored by passing its test")
 	}
@@ -91,11 +85,10 @@ func (c *Contract) BenchmarkInSequence(b *testing.B) {
 	}
 }
 
-// Takes a list of contracts and benchmarks the time it takes
-// to call each of their requests in sequence before starting
-// the next run. This may be useful if a list of contracts
-// defined, for example, a common customer journey to be
-// benchmarked.
+// BenchmarkInOrder takes a list of contracts and benchmarks the time it takes
+// to call each of their requests in sequence before starting the next run.
+// This may be useful if a list of contracts defined, for example, a common
+// customer journey to be benchmarked.
 func BenchmarkInOrder(b *testing.B, contracts []*Contract) {
 	errors := 0
 	for n := 0; n < b.N; n++ {

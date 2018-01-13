@@ -87,10 +87,6 @@ func getDummyContract() *Contract {
 	}
 }
 
-func TestDummyContractValidate(t *testing.T) {
-	getDummyContract().Validate(t)
-}
-
 func TestDummyContract(t *testing.T) {
 	getDummyContract().Assert(t)
 }
@@ -103,6 +99,6 @@ func BenchmarkDummyContractAsserts(b *testing.B) {
 
 func BenchmarkDummyContractInSequence(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		getDummyContract().BenchmarkInSequence(b)
+		getDummyContract().Benchmark(b)
 	}
 }

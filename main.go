@@ -43,7 +43,7 @@ import (
 	"github.com/fatih/color"
 )
 
-// This function should be run by TestMain in order for Gandalf to
+// Main should be run by TestMain in order for Gandalf to
 // analyze the whole test run.
 //  func TestMain(m *testing.M) {
 //    gandalf.Main(m)
