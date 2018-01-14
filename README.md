@@ -1,5 +1,7 @@
 # Gandalf
 
+[![Build Status](https://travis-ci.org/JumboInteractiveLimited/Gandalf.svg?branch=master)](https://travis-ci.org/JumboInteractiveLimited/Gandalf)
+
 ![mascot](gandalf-gopher.png)
 
 > One Tool rule them all, One Tool to CI them,
