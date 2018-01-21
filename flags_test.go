@@ -10,30 +10,41 @@ import (
 func TestHostOverrideFlags(t *testing.T) {
 	cases := []struct {
 		urlin   string
+		https   bool
+		root    string
 		ohost   string
 		osuffix string
 		urlout  string
 	}{
-		{"http://target", "", "", "http://target"},
-		{"http://target", "", ".lan", "http://target.lan"},
-		{"http://target/foo", "", ".lan", "http://target.lan/foo"},
-		{"http://target", "mock", "", "http://mock"},
-		{"http://target/foo", "mock", "", "http://mock/foo"},
-		{"http://target/foo", "mock", ".lan", "http://mock.lan/foo"},
-		{"http://target", "mock:8080", "", "http://mock:8080"},
-		{"http://target/foo", "mock:8080", "", "http://mock:8080/foo"},
-		{"http://target", "mock:8080", ".lan", "http://mock.lan:8080"},
-		{"http://target/foo", "mock:8080", ".lan", "http://mock.lan:8080/foo"},
-		{"http://target/foo", "mock:8080", "lan", "http://mock.lan:8080/foo"},
+		{"http://target", false, "", "", "", "http://target"},
+		{"http://target", false, "", "", ".lan", "http://target.lan"},
+		{"http://target/foo", false, "", "", ".lan", "http://target.lan/foo"},
+		{"http://target", false, "", "mock", "", "http://mock"},
+		{"http://target/foo", false, "", "mock", "", "http://mock/foo"},
+		{"http://target/foo", false, "", "mock", ".lan", "http://mock.lan/foo"},
+		{"http://target", false, "", "mock:8080", "", "http://mock:8080"},
+		{"http://target/foo", false, "", "mock:8080", "", "http://mock:8080/foo"},
+		{"http://target", false, "", "mock:8080", ".lan", "http://mock.lan:8080"},
+		{"http://target/foo", false, "", "mock:8080", ".lan", "http://mock.lan:8080/foo"},
+		{"http://target/foo", false, "", "mock:8080", "lan", "http://mock.lan:8080/foo"},
+		{"http://target/foo", true, "", "mock:8080", ".lan", "https://mock.lan:8080/foo"},
+		{"https://target/foo", true, "", "mock:8080", ".lan", "https://mock.lan:8080/foo"},
+		{"https://target/foo", false, "", "mock:8080", ".lan", "https://mock.lan:8080/foo"},
+		{"http://target/foo", false, "api", "mock:8080", "lan", "http://mock.lan:8080/api/foo"},
+		{"http://target/foo", false, "/api", "mock:8080", "lan", "http://mock.lan:8080/api/foo"},
+		{"http://target/foo", false, "/api/", "mock:8080", "lan", "http://mock.lan:8080/api/foo"},
+		{"http://target/foo", false, "api/", "mock:8080", "lan", "http://mock.lan:8080/api/foo"},
 	}
-	overrides := func(host, suffix string) {
+	overrides := func(host, suffix, root string, https bool) {
 		OverrideHost = host
 		OverrideHostSuffix = suffix
+		OverrideHTTPS = https
+		OverrideWebroot = root
 	}
 	for i, tt := range cases {
 		t.Run(fmt.Sprintf("Case %d", i+1), func(st *testing.T) {
-			defer overrides(OverrideHost, OverrideHostSuffix)
-			overrides(tt.ohost, tt.osuffix)
+			defer overrides(OverrideHost, OverrideHostSuffix, OverrideWebroot, OverrideHTTPS)
+			overrides(tt.ohost, tt.osuffix, tt.root, tt.https)
 
 			req, err := http.NewRequest("GET", tt.urlin, bytes.NewBuffer([]byte{}))
 			if err != nil {
