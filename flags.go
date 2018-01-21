@@ -22,6 +22,16 @@ var OverrideHost string
 // runtime.  This can be done using the `-gandalf.provider-suffix` cli switch.
 var OverrideHostSuffix string
 
+// OverrideWebroot gets prepended to all requests URI's. This can be useful
+// when targeting an environment that uses webroot routing to the service to be
+// tested. This can be done using the `-gandalf.provider-webroot` cli switch.
+var OverrideWebroot string
+
+// OverrideHTTPS if true will make all external requests use HTTPS. This may be
+// required when targeting a production environment. This can be done using the
+// `-gandalf.provider-https` cli switch.
+var OverrideHTTPS bool
+
 // OverrideChaos enables MMock definitions support chaos testing with random
 // 5xx responses by setting the ChaoticEvil switch in ToMMock exporters. You
 // can also override this in all definitions with the `-gandalf.mmock-chaos`
@@ -49,6 +59,8 @@ var MockSavePath string
 func init() {
 	flag.BoolVar(&OverrideChaos, "gandalf.mmock-chaos", false,
 		"Force enable chaos testing in all output mmock definitions.")
+	flag.BoolVar(&OverrideHTTPS, "gandalf.provider-https", false,
+		"Force all requests to use HTTPS.")
 	flag.BoolVar(&MockSkip, "gandalf.mmock-skip", false,
 		"Skip exporting contract definitions to mmock.")
 	flag.BoolVar(&OverrideColour, "gandalf.colour", false,
@@ -60,7 +72,9 @@ func init() {
 	flag.StringVar(&OverrideHost, "gandalf.provider-host", "",
 		"if set to a non empty string all http requests for calls will be rewritten to use this address as the hostname and optional port.")
 	flag.StringVar(&OverrideHostSuffix, "gandalf.provider-suffix", "",
-		"when provided, this will be appended to the hostname of any and all outbound http requests.")
+		"when provided, this will be appended to the hostname of any and all external requests.")
+	flag.StringVar(&OverrideWebroot, "gandalf.provider-webroot", "",
+		"when provided, this will be prepended to the request URI of any and all external requests.")
 	if !flag.Parsed() {
 		flag.Parse()
 	}
@@ -73,6 +87,15 @@ func maybeOverrideHost(req *http.Request) {
 	if OverrideHost != "" {
 		parts = strings.Split(OverrideHost, ":")
 		host = parts[0]
+	}
+	if OverrideHTTPS {
+		req.URL.Scheme = "https"
+	}
+	if OverrideWebroot != "" {
+		req.URL.Path = strings.Join([]string{
+			strings.TrimRight(OverrideWebroot, "/"),
+			strings.TrimLeft(req.URL.Path, "/"),
+		}, "/")
 	}
 	if OverrideHostSuffix != "" {
 		if !strings.HasSuffix(host, ".") {
