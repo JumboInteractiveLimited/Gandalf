@@ -93,7 +93,8 @@ func maybeOverrideHost(req *http.Request) {
 	}
 	if OverrideWebroot != "" {
 		req.URL.Path = strings.Join([]string{
-			strings.TrimRight(OverrideWebroot, "/"),
+			"",
+			strings.Trim(OverrideWebroot, "/"),
 			strings.TrimLeft(req.URL.Path, "/"),
 		}, "/")
 	}
