@@ -1,6 +1,7 @@
 package pathing
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/JumboInteractiveLimited/Gandalf/check"
@@ -15,24 +16,28 @@ import (
 // as is in a slice, the second case is when value extracted
 // is a map/hash then it will skip iterating over keys and return
 // the full json of the map for optional nesting of Checks.
-func GJSON(source, path string) ([]string, error) {
-	found := []string{}
+// Produces an error when no value is extracted.
+func GJSON(source, path string) (found []string, err error) {
+	found = []string{}
 	if path == "" {
 		if source != "" {
 			found = append(found, source)
 		}
-		return found, nil
+		return found, err
 	}
 	result := gjson.Get(source, path)
 	if strings.HasPrefix(result.Raw, "{") {
 		found = append(found, result.Raw)
-		return found, nil
+		return found, err
 	}
 	result.ForEach(func(key, value gjson.Result) bool {
 		found = append(found, value.Raw)
 		return true
 	})
-	return found, nil
+	if len(found) == 0 {
+		err = errors.New("no value extracted")
+	}
+	return found, err
 }
 
 // GJSONChecks is a preloaded version of Checks with GJSON as the extractor.
