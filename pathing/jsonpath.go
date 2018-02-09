@@ -1,7 +1,9 @@
 package pathing
 
 import (
+	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/JumboInteractiveLimited/Gandalf/check"
 	"github.com/NodePrime/jsonpath"
@@ -10,6 +12,7 @@ import (
 // JSON meets the Extractor type for extracting JSON data with JSONPath. This
 // extractor uses http://github.com/NodePrime/jsonpath which describes the
 // supported jsonpath expressions/paths/addresses that you may use.
+// Produces an error when a value cannot be extract for non wildcard paths.
 func JSON(source, path string) (found []string, err error) {
 	if path == "$+" {
 		return []string{source}, nil
@@ -25,7 +28,7 @@ func JSON(source, path string) (found []string, err error) {
 	}
 	excnt := 0
 	for {
-		if extract, ok := eval.Next(); err == nil && ok {
+		if extract, ok := eval.Next(); ok {
 			if eval.Error != nil {
 				err = fmt.Errorf("failed to extract jsonpath %#v on iteration %d due to error:\n%s", path, excnt, err)
 			}
@@ -34,6 +37,9 @@ func JSON(source, path string) (found []string, err error) {
 		} else {
 			break
 		}
+	}
+	if len(found) == 0 && !strings.Contains(path, "*") {
+		err = errors.New("no value extracted")
 	}
 	return found, err
 }

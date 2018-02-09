@@ -21,6 +21,12 @@ func TestJSON(t *testing.T) {
 			expected: []string{`"test"`},
 		},
 		{
+			blob:     `{"name":"test"}`,
+			path:     `$.names+`,
+			err:      true,
+			expected: []string{},
+		},
+		{
 			blob:     `{"things":[{"name":"one"},{"name":"two"}]}`,
 			path:     `$.things[*]+`,
 			err:      false,
@@ -31,6 +37,12 @@ func TestJSON(t *testing.T) {
 			path:     `$.things[*].name+`,
 			err:      false,
 			expected: []string{`"one"`, `"two"`},
+		},
+		{
+			blob:     `{"things":[{"name":"one"},{"name":"two"}]}`,
+			path:     `$.things[*].names+`,
+			err:      false,
+			expected: []string{},
 		},
 		{
 			blob:     `{"things":[{"type":"one"},{"type":"two", "unique": 1}]}`,
