@@ -28,7 +28,9 @@ type ToMMock struct {
 	// If true MMock will require the request body to match exactly to trigger this mock.
 	// This should be left false (the default ) for dynamic requests such as tokens/id's.
 	MatchBody bool
-	saved     bool
+	// When set this is used for the request path definition instead of the path from the Contract's Requestor.
+	Path  string
+	saved bool
 }
 
 func headersToValues(h map[string][]string) definition.Values {
@@ -47,6 +49,9 @@ func (m *ToMMock) translateRequest(req *http.Request) definition.Request {
 	out := definition.Request{
 		Path:   req.URL.Path,
 		Method: req.Method,
+	}
+	if m.Path != "" {
+		out.Path = m.Path
 	}
 	if m.MatchHeaders {
 		out.HttpHeaders = definition.HttpHeaders{
