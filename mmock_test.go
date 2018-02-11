@@ -2,9 +2,14 @@ package gandalf
 
 import (
 	"bytes"
+	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"testing"
+
+	"github.com/jmartin82/mmock/definition"
 )
 
 func ExampleToMMock() {
@@ -20,36 +25,85 @@ func ExampleToMMock() {
 	// Output:
 }
 
-func getMMockContract() *Contract {
+func getMMockContracts() []*Contract {
 	body := `{"test_url":"https://example.com"}`
-	return &Contract{
-		Name: "MMockContract",
-		Request: &DummyRequester{
-			&http.Response{
-				Status:        "200 OK",
-				StatusCode:    200,
-				Proto:         "HTTP/1.1",
-				ProtoMajor:    1,
-				ProtoMinor:    1,
-				Body:          ioutil.NopCloser(bytes.NewBufferString(body)),
-				ContentLength: int64(len(body)),
-				Request:       &http.Request{},
-				Header: http.Header{
-					"Content-Type": []string{"application/json; charset=utf-8"},
+	return []*Contract{
+		{
+			Name: "MMockContract",
+			Request: &DummyRequester{
+				&http.Response{
+					Status:        "200 OK",
+					StatusCode:    200,
+					Proto:         "HTTP/1.1",
+					ProtoMajor:    1,
+					ProtoMinor:    1,
+					Body:          ioutil.NopCloser(bytes.NewBufferString(body)),
+					ContentLength: int64(len(body)),
+					Request:       &http.Request{},
+					Header: http.Header{
+						"Content-Type": []string{"application/json; charset=utf-8"},
+					},
 				},
 			},
+			Check: &DummyChecker{},
+			Export: &ToMMock{
+				Scenario:      "thing",
+				TriggerStates: []string{"not_started"},
+				NewState:      "started",
+			},
 		},
-		Check: &DummyChecker{},
-		Export: &ToMMock{
-			Scenario:      "thing",
-			TriggerStates: []string{"not_started"},
-			NewState:      "started",
+		{
+			Name: "MMockContractPath",
+			Request: &DummyRequester{
+				&http.Response{
+					Status:        "200 OK",
+					StatusCode:    200,
+					Proto:         "HTTP/1.1",
+					ProtoMajor:    1,
+					ProtoMinor:    1,
+					Body:          ioutil.NopCloser(bytes.NewBufferString(body)),
+					ContentLength: int64(len(body)),
+					Request:       &http.Request{},
+					Header: http.Header{
+						"Content-Type": []string{"application/json; charset=utf-8"},
+					},
+				},
+			},
+			Check: &DummyChecker{},
+			Export: &ToMMock{
+				Scenario:      "thing",
+				TriggerStates: []string{"not_started"},
+				NewState:      "started",
+				Path:          "/people/:name",
+			},
 		},
 	}
 }
 
 func TestMMockExporter(t *testing.T) {
-	getMMockContract().Assert(t)
+	for i, tc := range getMMockContracts() {
+		t.Run(fmt.Sprintf("Case %d", i), func(st *testing.T) {
+			tc.Assert(t)
+			mock, err := readMMockDefinition(fmt.Sprintf("./%s.json", tc.Name))
+			if err != nil {
+				st.Fatalf("Could not read back mmock definition file due to error: %s", err)
+			}
+			if strings.Contains(tc.Name, "Path") {
+				if !strings.Contains(mock.Request.Path, ":name") {
+					st.Fatal("Could not find ':name' in path that should be overriden '%s'", mock.Request.Path)
+				}
+			}
+		})
+	}
+}
+
+func readMMockDefinition(path string) (mock definition.Mock, err error) {
+	file, err := ioutil.ReadFile(path)
+	if err != nil {
+		return
+	}
+	json.Unmarshal(file, &mock)
+	return
 }
 
 func BenchmarkMMockContracts(b *testing.B) {
@@ -57,6 +111,8 @@ func BenchmarkMMockContracts(b *testing.B) {
 		b.Skipf("MMock saving to file system is slow and therefore skipped in short mode.")
 	}
 	for n := 0; n < b.N; n++ {
-		getMMockContract().Assert(b)
+		for _, tc := range getMMockContracts() {
+			tc.Assert(b)
+		}
 	}
 }
