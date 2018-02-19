@@ -90,7 +90,7 @@ func TestMMockExporter(t *testing.T) {
 			}
 			if strings.Contains(tc.Name, "Path") {
 				if !strings.Contains(mock.Request.Path, ":name") {
-					st.Fatal("Could not find ':name' in path that should be overriden '%s'", mock.Request.Path)
+					st.Fatalf("Could not find ':name' in path that should be overriden '%s'\n", mock.Request.Path)
 				}
 			}
 		})
