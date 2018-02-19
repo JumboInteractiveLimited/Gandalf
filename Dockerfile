@@ -1,4 +1,4 @@
-FROM golang:1.9-stretch
+FROM golang:1.10-stretch
 WORKDIR /go/src/github.com/JumboInteractiveLimited/Gandalf
 RUN echo "Pulling go dependencies" \
 	&& go get -v -u \

@@ -70,7 +70,7 @@ func (c *Contract) Assert(t Testable) {
 // This uses the benchmark run counter instead of the Contract.Run field.
 func (c *Contract) Benchmark(b *testing.B) {
 	if c.Tested && c.notHonored {
-		b.Skipf("Contract %#v benchmark skipped as the contract was not honored by passing its test")
+		b.Skipf("Contract %s benchmark skipped as the contract was not honored by passing its test\n", c.Name)
 	}
 	errors := 0
 	for n := 0; n < b.N; n++ {
