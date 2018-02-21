@@ -4,6 +4,7 @@ package pathing
 
 import (
 	"fmt"
+	"testing"
 
 	"github.com/JumboInteractiveLimited/Gandalf/check"
 )
@@ -29,12 +30,12 @@ func Checks(ex Extractor, pcs PathChecks) check.Func {
 			extracts, err := ex(found, path)
 			if err != nil {
 				return throw(cname, found,
-					fmt.Errorf("check for path %s failed due to error:\n%s", path, err))
+					fmt.Errorf("check for path `%s` failed due to error:\n%s", path, err))
 			}
 			for _, s := range extracts {
 				if e := check(s); e != nil {
 					return throw(cname, found,
-						fmt.Errorf("check for path %s failed due to error:\n%s", path, e))
+						fmt.Errorf("check for path `%s` failed due to error:\n%s", path, e))
 				}
 			}
 		}
@@ -43,5 +44,8 @@ func Checks(ex Extractor, pcs PathChecks) check.Func {
 }
 
 func throw(check, found string, err error) error {
-	return fmt.Errorf("%s Failed when checking found value '%s':\n%s", check, found, err)
+	if testing.Verbose() {
+		return fmt.Errorf("Pathcheck `%s` failed on value `%s` with error:\n%s", check, found, err)
+	}
+	return fmt.Errorf("Pathcheck `%s` failed with error:\n%s", check, err)
 }
