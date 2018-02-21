@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"testing"
 )
 
 // Invert the output of the given Func, if it returned nil then return an
@@ -32,7 +33,7 @@ func And(funcs ...Func) Func {
 			err = f(found)
 			if err != nil {
 				return throw(cname, found,
-					fmt.Errorf(`check %d failed with error "%s"`, i, err))
+					fmt.Errorf("check %d failed with error:\n%s", i, err))
 			}
 		}
 		return nil
@@ -57,7 +58,7 @@ func Or(funcs ...Func) Func {
 			serrs = append(serrs, e.Error())
 		}
 		return throw(cname, found,
-			fmt.Errorf(`all checks failed with errors ["%s"]`, strings.Join(serrs, `","`)))
+			fmt.Errorf("all checks failed with errors:\n%s", strings.Join(serrs, "\n")))
 	}
 }
 
@@ -102,5 +103,8 @@ func Transform(f func(string) string, next Func) Func {
 }
 
 func throw(check, found string, err error) error {
-	return fmt.Errorf("Pathcheck '%s' Failed when checking found value '%s':\n%s", check, found, err)
+	if testing.Verbose() {
+		return fmt.Errorf("Pathcheck `%s` failed on value `%s` with error:\n%s", check, found, err)
+	}
+	return fmt.Errorf("Pathcheck `%s` failed with error:\n%s", check, err)
 }
