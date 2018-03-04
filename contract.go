@@ -56,6 +56,7 @@ func (c *Contract) export(t Testable) {
 // This executes the Exporter before and after calling the Requester, allowing
 // for pre and post exporters.
 func (c *Contract) Assert(t Testable) {
+	t.Helper()
 	defer func() { c.Run++ }()
 	defer c.export(t)
 	c.export(t)
@@ -69,6 +70,7 @@ func (c *Contract) Assert(t Testable) {
 // Benchmark just the Requester's ability to provider responses in sequence.
 // This uses the benchmark run counter instead of the Contract.Run field.
 func (c *Contract) Benchmark(b *testing.B) {
+	b.Helper()
 	if c.Tested && c.notHonored {
 		b.Skipf("Contract %s benchmark skipped as the contract was not honored by passing its test\n", c.Name)
 	}
@@ -90,6 +92,7 @@ func (c *Contract) Benchmark(b *testing.B) {
 // This may be useful if a list of contracts defined, for example, a common
 // customer journey to be benchmarked.
 func BenchmarkInOrder(b *testing.B, contracts []*Contract) {
+	b.Helper()
 	errors := 0
 	for n := 0; n < b.N; n++ {
 		for _, c := range contracts {
