@@ -42,10 +42,9 @@ var OverrideChaos bool
 // also override this wth the `-gandalf.mmock-skip` cli switch.
 var MockSkip bool
 
-// MockSleep sets the sleep period after exporting a mock definition set this
-// to the number of milliseconds to sleep or use the `-gandalf.mock-sleep` cli
-// switch.
-var MockSleep int
+// MockDelay sets the sleep/timeout period after exporting a mock definition. set this
+// to the number of milliseconds or use the `-gandalf.mock-delay` cli switch.
+var MockDelay int
 
 // Gandalf can be configured with custom flags given
 // to the `go test` command or be setting the respective
@@ -65,7 +64,7 @@ func init() {
 		"Skip exporting contract definitions to mmock.")
 	flag.BoolVar(&OverrideColour, "gandalf.colour", false,
 		"Override tty detection and force colour output.")
-	flag.IntVar(&MockSleep, "gandalf.mock-sleep", 250,
+	flag.IntVar(&MockDelay, "gandalf.mock-delay", 250,
 		"Override milliseconds to wait after exporting a mock definition.")
 	flag.StringVar(&MockSavePath, "gandalf.mock-dest", "./",
 		"Destination to use when saving mocks.")
@@ -78,6 +77,10 @@ func init() {
 	if !flag.Parsed() {
 		flag.Parse()
 	}
+}
+
+func mockSaveAPI() bool {
+	return strings.HasPrefix(MockSavePath, "http")
 }
 
 // Takes into account override flags.

@@ -7,7 +7,7 @@ services:
       - ../:/go/src/github.com/JumboInteractiveLimited/Gandalf
       - mmock:/mmock
     working_dir: /go/src/github.com/JumboInteractiveLimited/Gandalf/example
-    command: go test -v -bench . -benchmem -gandalf.colour -gandalf.mock-dest /mmock -gandalf.provider-host mock:8080 github.com/JumboInteractiveLimited/Gandalf/example
+    command: go test -v -bench . -benchmem -gandalf.colour -gandalf.mock-dest http://mock:8082 -gandalf.provider-host mock:8080 github.com/JumboInteractiveLimited/Gandalf/example
 
   mock:
     image: jordimartin/mmock
