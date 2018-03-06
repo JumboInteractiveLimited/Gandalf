@@ -10,8 +10,8 @@ import (
 	"github.com/jmartin82/mmock/definition"
 )
 
-// ToMMock exports Contract as mmock definitions to build a fake api endpoint
-// with optional state via mmock scenarios. mmock
+// ToMMock exports Contract as MMock definitions to build a fake api endpoint
+// with optional state via MMock scenarios. MMock
 // (https://github.com/jmartin82/mmock) is an http mocking server.
 type ToMMock struct {
 	// The Scenario to which state is stored.
@@ -95,9 +95,10 @@ func (m *ToMMock) translateMock() definition.Control {
 }
 
 // Uses Requester.GetRequest and Checker.GetResponse as a basis to build
-// an mmock definition.
+// an MMock definition.
 func (m *ToMMock) contractToMock(c *Contract) definition.Mock {
 	return definition.Mock{
+		URI:         c.Name + ".json",
 		Description: c.Name,
 		Request:     m.translateRequest(c.Request.GetRequest()),
 		Response:    m.translateResponse(c.Check.GetResponse()),
@@ -105,22 +106,38 @@ func (m *ToMMock) contractToMock(c *Contract) definition.Mock {
 	}
 }
 
-func (m *ToMMock) saveMockToFile(mock definition.Mock, dest string) error {
+func (m *ToMMock) saveMockToFile(mock definition.Mock) error {
 	out, err := json.Marshal(mock)
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(path.Join(dest, mock.Description+".json"), out, 0644)
-	time.Sleep(time.Duration(MockSleep) * time.Millisecond)
+	err = ioutil.WriteFile(path.Join(MockSavePath, mock.Description+".json"), out, 0644)
+	if err != nil {
+		return err
+	}
+	time.Sleep(time.Duration(MockDelay) * time.Millisecond)
 	m.saved = true
 	return err
 }
 
-// Save a valid mmock definition to a json file with the contract name as the filename.
+func (m *ToMMock) saveMockToAPI(mock definition.Mock) error {
+	api := getMMockClient()
+	if e := api.upsertDefinition(mock); e != nil {
+		return e
+	}
+	m.saved = true
+	return nil
+}
+
+// Save a valid MMock definition to a json file with the contract name as the filename.
 // This incurs disk IO so is restricted to only saving once per instance.
 func (m *ToMMock) Save(c *Contract) error {
 	if m.saved || c.Tested || MockSkip {
 		return nil
 	}
-	return m.saveMockToFile(m.contractToMock(c), MockSavePath)
+	saver := m.saveMockToFile
+	if mockSaveAPI() {
+		saver = m.saveMockToAPI
+	}
+	return saver(m.contractToMock(c))
 }

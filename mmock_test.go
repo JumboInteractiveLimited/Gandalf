@@ -86,7 +86,7 @@ func TestMMockExporter(t *testing.T) {
 			tc.Assert(t)
 			mock, err := readMMockDefinition(fmt.Sprintf("./%s.json", tc.Name))
 			if err != nil {
-				st.Fatalf("Could not read back mmock definition file due to error: %s", err)
+				st.Fatalf("Could not read back MMock definition file due to error: %s", err)
 			}
 			if strings.Contains(tc.Name, "Path") {
 				if !strings.Contains(mock.Request.Path, ":name") {
