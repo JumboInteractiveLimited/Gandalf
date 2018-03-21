@@ -3,7 +3,7 @@ WORKDIR /go/src/github.com/JumboInteractiveLimited/Gandalf
 RUN echo "Pulling go dependencies" \
 	&& go get -v -u \
 		github.com/fatih/color \
-		github.com/NodePrime/jsonpath \
+		github.com/JumboInteractiveLimited/jsonpath \
 		github.com/jmartin82/mmock \
 		github.com/tidwall/gjson \
 		gopkg.in/h2non/gock.v1
