@@ -1,7 +1,10 @@
-sudo: required
-
-services:
-  - docker
-
 language: go
-script: ./test.sh
+go:
+  - "1.x"
+  - "1.9"
+  - "1.10"
+script: go test -v -short -cover -benchtime 10ms -bench . -benchmem ./...
+
+notifications:
+  webhooks: https://www.travisbuddy.com/
+  on_success: never

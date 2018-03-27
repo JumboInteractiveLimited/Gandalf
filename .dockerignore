@@ -4,8 +4,6 @@ Dockerfile
 .gitignore
 *.md
 *.sh
-old
-example.old
 *.json
 tags
-/example
+/examples/prototype

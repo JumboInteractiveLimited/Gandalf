@@ -25,7 +25,7 @@ cleanup() {
 }
 
 setup() {
-	export COMPOSE_FILE=example/docker-compose.yml
+	export COMPOSE_FILE=examples/prototype/docker-compose.yml
 	export COMPOSE_PROJECT_NAME=gandalf
 	trap cleanup EXIT
 }

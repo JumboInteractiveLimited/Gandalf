@@ -2,7 +2,6 @@ package gandalf
 
 import (
 	"net/http"
-	"testing"
 	"time"
 
 	c "github.com/JumboInteractiveLimited/Gandalf/check"
@@ -137,8 +136,4 @@ func ExampleContract() {
 			},
 		},
 	}
-}
-
-func TestMain(m *testing.M) {
-	Main(m)
 }
