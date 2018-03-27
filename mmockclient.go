@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/eapache/go-resiliency/retrier"
 	"github.com/jmartin82/mmock/definition"
 )
 
@@ -84,21 +85,44 @@ func (self *clientMMock) sendDefinition(method string, mock definition.Mock) err
 	if err != nil {
 		return err
 	}
-	if method == http.MethodPost && resp.StatusCode != http.StatusCreated {
-		return fmt.Errorf("POST to MMock failed with status code %d", resp.StatusCode)
-	}
-	if method == http.MethodPut && resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("PUT to MMock failed with status code %d", resp.StatusCode)
+	switch method {
+	case http.MethodPost:
+		if resp.StatusCode == http.StatusConflict {
+			return self.sendDefinition("PUT", mock)
+		} else if resp.StatusCode != http.StatusCreated {
+			return fmt.Errorf("POST to MMock failed with status code %d", resp.StatusCode)
+		}
+	case http.MethodPut:
+		if resp.StatusCode != http.StatusOK {
+			return fmt.Errorf("PUT to MMock failed with status code %d", resp.StatusCode)
+		}
+	default:
+		return fmt.Errorf("Cannot send definitons to MMock via HTTP Method %s", method)
 	}
 	return nil
 }
 
+func (self *clientMMock) getRetrier() *retrier.Retrier {
+	return retrier.New(
+		retrier.ConstantBackoff(3, time.Duration(MockDelay)*time.Millisecond),
+		nil,
+	)
+}
+
 func (self *clientMMock) createDefinition(mock definition.Mock) error {
-	return self.sendDefinition("POST", mock)
+	return self.getRetrier().Run(
+		func() error {
+			return self.sendDefinition("POST", mock)
+		},
+	)
 }
 
 func (self *clientMMock) updateDefinition(mock definition.Mock) error {
-	return self.sendDefinition("PUT", mock)
+	return self.getRetrier().Run(
+		func() error {
+			return self.sendDefinition("PUT", mock)
+		},
+	)
 }
 
 func (self *clientMMock) upsertDefinition(mock definition.Mock) error {

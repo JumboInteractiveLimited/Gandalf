@@ -6,7 +6,8 @@ RUN echo "Pulling go dependencies" \
 		github.com/JumboInteractiveLimited/jsonpath \
 		github.com/jmartin82/mmock \
 		github.com/tidwall/gjson \
-		gopkg.in/h2non/gock.v1
+		gopkg.in/h2non/gock.v1 \
+		github.com/eapache/go-resiliency/retrier
 COPY . .
 RUN echo "Testing gandalf" \
 	&& go test -v -cover -short github.com/JumboInteractiveLimited/Gandalf/...
