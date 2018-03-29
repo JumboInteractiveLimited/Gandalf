@@ -32,7 +32,7 @@ func Test_clientMMock_constructURL(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		wantUrl *url.URL
+		wantURL *url.URL
 		wantErr bool
 	}{
 		{
@@ -42,7 +42,7 @@ func Test_clientMMock_constructURL(t *testing.T) {
 				client: &http.Client{Timeout: time.Second},
 			},
 			args:    args{""},
-			wantUrl: urlOrFail(t, "http://test:8082"),
+			wantURL: urlOrFail(t, "http://test:8082"),
 			wantErr: false,
 		},
 		{
@@ -52,7 +52,7 @@ func Test_clientMMock_constructURL(t *testing.T) {
 				client: &http.Client{Timeout: time.Second},
 			},
 			args:    args{"/api"},
-			wantUrl: urlOrFail(t, "http://test:8082/api"),
+			wantURL: urlOrFail(t, "http://test:8082/api"),
 			wantErr: false,
 		},
 		{
@@ -62,7 +62,7 @@ func Test_clientMMock_constructURL(t *testing.T) {
 				client: &http.Client{Timeout: time.Second},
 			},
 			args:    args{"api"},
-			wantUrl: urlOrFail(t, "http://test:8082/api"),
+			wantURL: urlOrFail(t, "http://test:8082/api"),
 			wantErr: false,
 		},
 		{
@@ -72,7 +72,7 @@ func Test_clientMMock_constructURL(t *testing.T) {
 				client: &http.Client{Timeout: time.Second},
 			},
 			args:    args{"api/"},
-			wantUrl: urlOrFail(t, "http://test:8082/api/"),
+			wantURL: urlOrFail(t, "http://test:8082/api/"),
 			wantErr: false,
 		},
 	}
@@ -82,13 +82,13 @@ func Test_clientMMock_constructURL(t *testing.T) {
 				base:   tt.fields.base,
 				client: tt.fields.client,
 			}
-			gotUrl, err := self.constructURL(tt.args.path)
+			gotURL, err := self.constructURL(tt.args.path)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("clientMMock.constructURL() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(gotUrl, tt.wantUrl) {
-				t.Errorf("clientMMock.constructURL() = %v, want %v", gotUrl, tt.wantUrl)
+			if !reflect.DeepEqual(gotURL, tt.wantURL) {
+				t.Errorf("clientMMock.constructURL() = %v, want %v", gotURL, tt.wantURL)
 			}
 		})
 	}
@@ -97,7 +97,7 @@ func Test_clientMMock_constructURL(t *testing.T) {
 func Test_clientMMock_getDefinitions(t *testing.T) {
 	defer gock.Off()
 	mocks := []definition.Mock{
-		definition.Mock{
+		{
 			URI:         "AAA",
 			Description: "BBB",
 			Request: definition.Request{
@@ -198,7 +198,7 @@ func Test_clientMMock_sendDefinition(t *testing.T) {
 			},
 			args: args{
 				method: "POST",
-				mock: mock,
+				mock:   mock,
 			},
 			wantErr: false,
 		},
@@ -210,7 +210,7 @@ func Test_clientMMock_sendDefinition(t *testing.T) {
 			},
 			args: args{
 				method: "PUT",
-				mock: mock,
+				mock:   mock,
 			},
 			wantErr: false,
 		},

@@ -1,5 +1,6 @@
-// check functions are so simple there are many useful ways
-// they can be generated.
+// Package check is a collection of functions that can be used for checking
+// single values. These functions are so simple there are many useful ways they
+// can be generated and some common cases are provided here.
 package check
 
 import (
