@@ -65,12 +65,12 @@ func Main(m *testing.M) {
 	os.Exit(ret)
 }
 
-// Wrapper around Main that will start listening and serving the given
-// http.Handler (or any third party mux/router that conforms to http.Handler)
-// on a random port to to run contracts against over the loopback network
-// interface. This allows for code coverage reports of your server
-// implementation when written in Go. If handler param is nil then
-// the default Go mux will be used.
+// MainWithHandler wraps around Main and will start listening and serving the
+// given http.Handler (or any third party mux/router that conforms to
+// http.Handler) on a random port to to run contracts against over the loopback
+// network interface. This allows for code coverage reports of your server
+// implementation when written in Go. If handler param is nil then the default
+// Go mux will be used.
 func MainWithHandler(m *testing.M, handler http.Handler) {
 	listener, err := net.Listen("tcp", "localhost:0")
 	if err != nil {

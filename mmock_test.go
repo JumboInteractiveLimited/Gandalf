@@ -90,7 +90,7 @@ func TestMMockExporter(t *testing.T) {
 			}
 			if strings.Contains(tc.Name, "Path") {
 				if !strings.Contains(mock.Request.Path, ":name") {
-					st.Fatalf("Could not find ':name' in path that should be overriden '%s'\n", mock.Request.Path)
+					st.Fatalf("Could not find ':name' in path that should be overridden '%s'\n", mock.Request.Path)
 				}
 			}
 		})
@@ -102,8 +102,7 @@ func readMMockDefinition(path string) (mock definition.Mock, err error) {
 	if err != nil {
 		return
 	}
-	json.Unmarshal(file, &mock)
-	return
+	return mock, json.Unmarshal(file, &mock)
 }
 
 func BenchmarkMMockContracts(b *testing.B) {

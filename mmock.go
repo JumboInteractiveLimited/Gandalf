@@ -14,12 +14,14 @@ import (
 // with optional state via MMock scenarios. MMock
 // (https://github.com/jmartin82/mmock) is an http mocking server.
 type ToMMock struct {
-	// The Scenario to which state is stored.
-	Scenario string
 	// The state(s) that the Scenario must be in to trigger this mock.
 	TriggerStates []string
+	// The Scenario to which state is stored.
+	Scenario string
 	// The state to transition the scenario to when this mock is triggered.
 	NewState string
+	// When set this is used for the request path definition instead of the path from the Contract's Requestor.
+	Path string
 	// Enables chaos testing by causing the mock, when triggered, may return a 5xx instead.
 	ChaoticEvil bool
 	// If true MMock will require the request headers to match exactly to trigger this mock.
@@ -28,9 +30,7 @@ type ToMMock struct {
 	// If true MMock will require the request body to match exactly to trigger this mock.
 	// This should be left false (the default ) for dynamic requests such as tokens/id's.
 	MatchBody bool
-	// When set this is used for the request path definition instead of the path from the Contract's Requestor.
-	Path  string
-	saved bool
+	saved     bool
 }
 
 func headersToValues(h map[string][]string) definition.Values {

@@ -40,16 +40,16 @@ var getMMockClient = func() func() *clientMMock {
 	}
 }()
 
-func (self *clientMMock) constructURL(path string) (out *url.URL, err error) {
+func (mmock *clientMMock) constructURL(path string) (*url.URL, error) {
 	uri, err := url.Parse(path)
-	if err == nil {
-		out = self.base.ResolveReference(uri)
+	if err != nil {
+		return nil, err
 	}
-	return
+	return mmock.base.ResolveReference(uri), nil
 }
 
-func (self *clientMMock) call(method, path, body string) (*http.Response, error) {
-	u, err := self.constructURL(path)
+func (mmock *clientMMock) call(method, path, body string) (*http.Response, error) {
+	u, err := mmock.constructURL(path)
 	if err != nil {
 		return nil, err
 	}
@@ -60,35 +60,35 @@ func (self *clientMMock) call(method, path, body string) (*http.Response, error)
 	if method == http.MethodPut || method == http.MethodPost {
 		req.Header.Add("Content-Type", "application/json")
 	}
-	return self.client.Do(req)
+	return mmock.client.Do(req)
 }
 
-func (self *clientMMock) getDefinitions() (out []definition.Mock, err error) {
-	resp, err := self.call("GET", "/api/mapping", "")
+func (mmock *clientMMock) getDefinitions() (out []definition.Mock, err error) {
+	resp, err := mmock.call("GET", "/api/mapping", "")
 	if err != nil {
-		return
+		return nil, err
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err == nil {
 		err = json.Unmarshal(body, &out)
 	}
-	return
+	return out, err
 }
 
-func (self *clientMMock) sendDefinition(method string, mock definition.Mock) error {
+func (mmock *clientMMock) sendDefinition(method string, mock definition.Mock) error {
 	muri := getMMockDefURI(mock)
 	bbody, err := json.Marshal(mock)
 	if err != nil {
 		return err
 	}
-	resp, err := self.call(method, "/api/mapping/"+muri, string(bbody))
+	resp, err := mmock.call(method, "/api/mapping/"+muri, string(bbody))
 	if err != nil {
 		return err
 	}
 	switch method {
 	case http.MethodPost:
 		if resp.StatusCode == http.StatusConflict {
-			return self.sendDefinition("PUT", mock)
+			return mmock.sendDefinition("PUT", mock)
 		} else if resp.StatusCode != http.StatusCreated {
 			return fmt.Errorf("POST to MMock failed with status code %d", resp.StatusCode)
 		}
@@ -102,31 +102,31 @@ func (self *clientMMock) sendDefinition(method string, mock definition.Mock) err
 	return nil
 }
 
-func (self *clientMMock) getRetrier() *retrier.Retrier {
+func (mmock *clientMMock) getRetrier() *retrier.Retrier {
 	return retrier.New(
 		retrier.ConstantBackoff(3, time.Duration(MockDelay)*time.Millisecond),
 		nil,
 	)
 }
 
-func (self *clientMMock) createDefinition(mock definition.Mock) error {
-	return self.getRetrier().Run(
+func (mmock *clientMMock) createDefinition(mock definition.Mock) error {
+	return mmock.getRetrier().Run(
 		func() error {
-			return self.sendDefinition("POST", mock)
+			return mmock.sendDefinition("POST", mock)
 		},
 	)
 }
 
-func (self *clientMMock) updateDefinition(mock definition.Mock) error {
-	return self.getRetrier().Run(
+func (mmock *clientMMock) updateDefinition(mock definition.Mock) error {
+	return mmock.getRetrier().Run(
 		func() error {
-			return self.sendDefinition("PUT", mock)
+			return mmock.sendDefinition("PUT", mock)
 		},
 	)
 }
 
-func (self *clientMMock) upsertDefinition(mock definition.Mock) error {
-	all, err := self.getDefinitions()
+func (mmock *clientMMock) upsertDefinition(mock definition.Mock) error {
+	all, err := mmock.getDefinitions()
 	if err != nil {
 		return err
 	}
@@ -137,9 +137,9 @@ func (self *clientMMock) upsertDefinition(mock definition.Mock) error {
 			exists = true
 		}
 	}
-	do := self.createDefinition
+	do := mmock.createDefinition
 	if exists {
-		do = self.updateDefinition
+		do = mmock.updateDefinition
 	}
 	return do(mock)
 }
