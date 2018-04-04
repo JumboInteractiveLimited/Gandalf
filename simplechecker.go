@@ -68,7 +68,7 @@ func (c *SimpleChecker) assertHeaders(res *http.Response) (err error) {
 				}
 			}
 			if !hasHeaderValue {
-				return fmt.Errorf("Expected header value %#v not found in header key %#v with values %v", cv, expectedKey, res.Header[expectedKey])
+				return fmt.Errorf("Expected header value %#v not found in header key %#v with %d values %v", cv, expectedKey, len(res.Header[expectedKey]), res.Header[expectedKey])
 			}
 		}
 	}
