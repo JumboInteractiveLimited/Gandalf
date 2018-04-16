@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/JumboInteractiveLimited/Gandalf/check"
 )
@@ -43,16 +44,34 @@ func (c *SimpleChecker) assertStatus(res *http.Response) (err error) {
 	return err
 }
 
+func splitHeaders(in http.Header) (out http.Header) {
+	if len(in) > 0 {
+		out = http.Header{}
+	}
+	for k, v := range in {
+		for _, hv := range v {
+			if strings.Contains(hv, ",") {
+				for _, pv := range strings.Split(hv, ",") {
+					out.Add(k, strings.TrimSpace(pv))
+				}
+			} else {
+				out.Add(k, hv)
+			}
+		}
+	}
+	return out
+}
+
 // Assert the given HTTP response has the expected headers, this check allows
 // for additional headers to those that are expected without error but all expected
 // headers must have (at least) the specified value(s).
-func (c *SimpleChecker) assertHeaders(res *http.Response) (err error) {
+func (c *SimpleChecker) assertHeaders(responseHeaders http.Header) (err error) {
 	if len(c.Headers) == 0 {
 		return nil
 	}
 	for expectedKey := range c.Headers {
 		hasHeaderKey := false
-		for k := range res.Header {
+		for k := range responseHeaders {
 			if k == expectedKey {
 				hasHeaderKey = true
 			}
@@ -62,13 +81,14 @@ func (c *SimpleChecker) assertHeaders(res *http.Response) (err error) {
 		}
 		for _, cv := range c.Headers[expectedKey] {
 			hasHeaderValue := false
-			for _, rv := range res.Header[expectedKey] {
+			for _, rv := range responseHeaders[expectedKey] {
 				if rv == cv {
 					hasHeaderValue = true
 				}
 			}
 			if !hasHeaderValue {
-				return fmt.Errorf("Expected header value %#v not found in header key %#v with %d values %v", cv, expectedKey, len(res.Header[expectedKey]), res.Header[expectedKey])
+				return fmt.Errorf("Expected header value %#v not found in header key %#v with %d values %v",
+					cv, expectedKey, len(responseHeaders[expectedKey]), responseHeaders[expectedKey])
 			}
 		}
 	}
@@ -96,7 +116,7 @@ func (c *SimpleChecker) Assert(res *http.Response) error {
 	if e := c.assertStatus(res); e != nil {
 		return fmt.Errorf("Status check failed, response body was:\n%s\n%s", GetResponseBody(res), e)
 	}
-	if e := c.assertHeaders(res); e != nil {
+	if e := c.assertHeaders(splitHeaders(res.Header)); e != nil {
 		return e
 	}
 	return c.assertBody(res)

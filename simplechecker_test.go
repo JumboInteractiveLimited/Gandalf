@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 	"testing"
 
 	"github.com/JumboInteractiveLimited/Gandalf/check"
@@ -62,5 +63,51 @@ func TestSimpleChecker(t *testing.T) {
 func BenchmarkSimpleCheckerAssert(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		getSimpleCheckerContract().Assert(b)
+	}
+}
+
+func Test_splitHeaders(t *testing.T) {
+	type args struct {
+		in http.Header
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantOut http.Header
+	}{
+		{
+			name: "Separate Values",
+			args: args{http.Header{
+				"Stuff": []string{"one", "two"},
+			}},
+			wantOut: http.Header{
+				"Stuff": []string{"one", "two"},
+			},
+		},
+		{
+			name: "CSV Values",
+			args: args{http.Header{
+				"Stuff": []string{"one,two"},
+			}},
+			wantOut: http.Header{
+				"Stuff": []string{"one", "two"},
+			},
+		},
+		{
+			name: "Mixed Values",
+			args: args{http.Header{
+				"Stuff": []string{"one", "two,three"},
+			}},
+			wantOut: http.Header{
+				"Stuff": []string{"one", "two", "three"},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotOut := splitHeaders(tt.args.in); !reflect.DeepEqual(gotOut, tt.wantOut) {
+				t.Errorf("splitHeaders() = %v, want %v", gotOut, tt.wantOut)
+			}
+		})
 	}
 }
