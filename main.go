@@ -78,6 +78,7 @@ func MainWithHandler(m *testing.M, handler http.Handler) {
 	}
 	MockSkip = true
 	OverrideHost = listener.Addr().String()
+	OverrideHostSuffix = ""
 	go func() {
 		log.Fatalln(http.Serve(listener, handler))
 	}()
