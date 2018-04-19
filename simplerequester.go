@@ -30,6 +30,15 @@ func NewSimpleRequester(method, url, body string, headers http.Header, timeout t
 	}
 }
 
+func (r *SimpleRequester) getClient() *http.Client {
+	return &http.Client{
+		Timeout: r.Timeout,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+}
+
 // Call the Request. The last response is stored to be given on multiple calls for the same run.
 func (r *SimpleRequester) Call(run int) (*http.Response, error) {
 	if r.lastResp != nil && run == r.lastRun {
@@ -38,8 +47,7 @@ func (r *SimpleRequester) Call(run int) (*http.Response, error) {
 	if r.Timeout == 0 {
 		r.Timeout = time.Second
 	}
-	client := &http.Client{Timeout: r.Timeout}
-	res, err := client.Do(r.Request)
+	res, err := r.getClient().Do(r.Request)
 	if err == nil {
 		r.lastResp = res
 	}
